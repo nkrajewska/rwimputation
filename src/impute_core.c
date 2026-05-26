@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include <omp.h>
 
+int sample_next_node(const double *prob_row, int num_nodes, double rand_val) {
+    double cum_prob = 0.0;
+    for (int k = 0; k < num_nodes; k++) {
+        cum_prob += prob_row[k];
+        if (rand_val <= cum_prob) {
+            return k; 
+        }
+    }
+    return num_nodes - 1; 
+}
 
 double simulate_random_walk(int start_node, const double* p_matrix, const double *data, int target_col, int num_rows, int num_steps, unsigned int* seed){
     double *trail = (double*)malloc(num_steps*sizeof(double));
@@ -18,16 +28,7 @@ double simulate_random_walk(int start_node, const double* p_matrix, const double
     return fin_val;
 }
 
-int sample_next_node(const double *prob_row, int num_nodes, double rand_val) {
-    double cum_prob = 0.0;
-    for (int k = 0; k < num_nodes; k++) {
-        cum_prob += prob_row[k];
-        if (rand_val <= cum_prob) {
-            return k; 
-        }
-    }
-    return num_nodes - 1; 
-}
+
 
 void run_rw_algorithm(const double *data, const double *p_matrix, const int *col_types, 
                       const double *params, int rows, int cols, double *result){
