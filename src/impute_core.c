@@ -14,7 +14,59 @@ int sample_next_node(const double *prob_row, int num_nodes, double rand_val) {
     return num_nodes - 1; 
 }
 
-double simulate_random_walk(int start_node, const double* p_matrix, const double *data, int target_col, int num_rows, int num_steps, unsigned int* seed){
+double calculate_average(double *vect, int n){
+    double sum = 0.0;
+    int count = 0;
+    for(int i = 0; i <n; i++){
+        if(!ISNA(vect[i])){
+            sum += vect[i];
+            count++;
+        }
+    }
+    if(!count) return NA_REAL;
+    return sum/count;
+}
+double calculate_mode(double *vect, int n){
+    int counts[n];
+    int vals[n];
+    int n_uniq = 0;
+
+    for(int i = 0; i <n; i++){
+        if(!ISNA(vect[i])){
+            int val = (int)vect[i];
+            
+            int flag =  0;
+            for(int j=0; j< n_uniq; j++){
+                if(vals[j] == val){
+                    counts[j]++;
+                    flag = 1;
+                    break;
+                }
+            }
+
+            if(!flag){
+                counts[n_uniq] =1;
+                vals[n_uniq] = val;
+                n_uniq++;
+            }
+        }
+    }
+    if(!n_uniq) return NA_REAL;    
+
+    int mode = vals[0];
+    int max_counts = counts[0];
+    
+    for(int i = 1; i < n_uniq; i++){
+        if(counts[i] > max_counts){
+            max_counts = counts[i];
+            mode = vals[i];
+        }
+    }
+    return (double)mode;
+}
+
+double simulate_random_walk(int start_node, const double* p_matrix, const double *data, int target_col, 
+    int num_rows, int num_steps, unsigned int* seed, int col_type){
     double *trail = (double*)malloc(num_steps*sizeof(double));
     int curr_node = start_node;
 
@@ -23,7 +75,12 @@ double simulate_random_walk(int start_node, const double* p_matrix, const double
         curr_node = sample_next_node(&p_matrix[curr_node * num_rows], num_rows, rand_val);
         trail[i] = data[curr_node + target_col * num_rows];
     }
-    double fin_val = calculate_average(trail, num_steps);
+    double fin_val;
+    if (col_type){
+        
+    }else{
+        calculate_average(trail, num_steps);
+    }
     free(trail);
     return fin_val;
 }
@@ -42,7 +99,7 @@ void run_rw_algorithm(const double *data, const double *p_matrix, const int *col
             
             if (ISNA(data[index])) {
                 unsigned int thread_seed = (unsigned int)(index + omp_get_thread_num());
-                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &thread_seed);
+                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &thread_seed, col_types[j]);
             } else {
                 result[index] = data[index];
             }
