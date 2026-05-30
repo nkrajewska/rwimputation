@@ -8,7 +8,8 @@ void run_rw_algorithm(
     const double *params, 
     int rows, 
     int cols, 
-    double *result
+    double *result,
+    unsigned int base_seed
 );
 
 #endif 

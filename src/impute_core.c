@@ -77,9 +77,9 @@ double simulate_random_walk(int start_node, const double* p_matrix, const double
     }
     double fin_val;
     if (col_type){
-        
+        fin_val = calculate_mode(trail, num_steps);
     }else{
-        calculate_average(trail, num_steps);
+        fin_val = calculate_average(trail, num_steps);
     }
     free(trail);
     return fin_val;
@@ -88,8 +88,11 @@ double simulate_random_walk(int start_node, const double* p_matrix, const double
 
 
 void run_rw_algorithm(const double *data, const double *p_matrix, const int *col_types, 
-                      const double *params, int rows, int cols, double *result){
+                      const double *params, int rows, int cols, double *result, unsigned int base_seed){
     int num_steps = (int)params[0];
+    int max_threads = omp_get_max_threads();
+    unsigned int *seeds = malloc(max_threads * sizeof(unsigned int));
+    for (int t = 0; t < max_threads; t++) seeds[t] = base_seed + (unsigned int)t*2654435761u;
 
     #pragma omp parallel for collapse(2) schedule(dynamic)
     for (int j = 0; j < cols; j++) {
@@ -98,8 +101,8 @@ void run_rw_algorithm(const double *data, const double *p_matrix, const int *col
             int index = i + j * rows; 
             
             if (ISNA(data[index])) {
-                unsigned int thread_seed = (unsigned int)(index + omp_get_thread_num());
-                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &thread_seed, col_types[j]);
+                int t_id = omp_get_thread_num();
+                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &seeds[t_id], col_types[j]);
             } else {
                 result[index] = data[index];
             }
