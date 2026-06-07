@@ -7,11 +7,35 @@ create_p_matrix <- function(data) {
     p_matrix <- (1 - dist)/rowSums(1-dist, na.rm = TRUE)
     return(p_matrix)
 }
+
+est_mix_time <- function(p_matrix, eps = 0.01){
+    n <- nrow(p_matrix)
+    eig <- RSpectra::eigs(p_matrix, 2, which = 'LM')$values
+    lambda <- sort(Mod(eig), decreasing = TRUE)[2]
+
+    gap <- 1 - lambda
+    mix_time <- ceiling(log(n / eps) / gap)
+    mix_time <- min(mix_time, 50)
+    list(
+    s_num_steps = mix_time,
+    spectral_gap = gap,
+    lambda = lambda
+  )
+}
+
+
 #' @export
 #' @useDynLib rwimputation, .registration = TRUE
-rwimpute <- function(data, num_steps, seed=42L) {
+rwimpute <- function(data, num_steps = -1L, seed=42L) {
     if (!is.data.frame(data)) data <- as.data.frame(data)
     p_matrix <- create_p_matrix(data)
+
+    if (num_steps == -1L) {
+        mix_time <- est_mix_time(p_matrix, eps = 0.01)
+        num_steps  <- as.integer( mix_time$s_num_steps)
+    } else if (num_steps < 1L) {
+        stop("")
+    }
 
     cols <- ncol(data)
     col_types <- integer(cols)
