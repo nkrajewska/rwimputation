@@ -66,15 +66,32 @@ double calculate_mode(double *vect, int n){
 }
 
 double simulate_random_walk(int start_node, const double* p_matrix, const double *data, int target_col, 
-    int num_rows, int num_steps, unsigned int* seed, int col_type){
+    int num_rows, int num_steps, unsigned int* seed, int col_type, double restart_prob){
+        
     double *trail = (double*)malloc(num_steps*sizeof(double));
     int curr_node = start_node;
 
-    for(int i = 0; i < num_steps; i++){
-        double rand_val = (double)rand_r(seed) / RAND_MAX;
-        curr_node = sample_next_node(&p_matrix[curr_node * num_rows], num_rows, rand_val);
-        trail[i] = data[curr_node + target_col * num_rows];
+    const double* targ_col_ptr = &data[target_col*num_rows];
+
+
+    if(restart_prob > 0.0){
+        for(int i =0; i < num_steps; i++){
+            double rnd = (double)rand_r(seed)/RAND_MAX;
+            if(rnd<restart_prob){
+                curr_node = start_node;
+            }
+            double rand_val = (double)rand_r(seed) / RAND_MAX;
+            curr_node = sample_next_node(&p_matrix[curr_node * num_rows], num_rows, rand_val);
+            trail[i] = data[curr_node + target_col * num_rows];
+        }
+    }else{
+        for(int i = 0; i< num_steps;i++){
+            double rand_val = (double)rand_r(seed) / RAND_MAX;
+            curr_node = sample_next_node(&p_matrix[curr_node * num_rows], num_rows, rand_val);
+            trail[i] = targ_col_ptr[curr_node];
+        }
     }
+
     double fin_val;
     if (col_type){
         fin_val = calculate_mode(trail, num_steps);
@@ -90,6 +107,8 @@ double simulate_random_walk(int start_node, const double* p_matrix, const double
 void run_rw_algorithm(const double *data, const double *p_matrix, const int *col_types, 
                       const double *params, int rows, int cols, double *result, unsigned int base_seed){
     int num_steps = (int)params[0];
+    double restart_prob = params[1];
+
     int max_threads = omp_get_max_threads();
     unsigned int *seeds = malloc(max_threads * sizeof(unsigned int));
     for (int t = 0; t < max_threads; t++) seeds[t] = base_seed + (unsigned int)t*2654435761u;
@@ -102,10 +121,9 @@ void run_rw_algorithm(const double *data, const double *p_matrix, const int *col
             
             if (ISNA(data[index])) {
                 int t_id = omp_get_thread_num();
-                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &seeds[t_id], col_types[j]);
-            } else {
-                result[index] = data[index];
-            }
+                result[index] = simulate_random_walk(i, p_matrix, data, j, rows, num_steps, &seeds[t_id], col_types[j], restart_prob);
+            } else result[index] = data[index];
         }
     }
+    free(seeds);
 }

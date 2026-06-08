@@ -10,31 +10,48 @@ create_p_matrix <- function(data) {
 
 est_mix_time <- function(p_matrix, eps = 0.01){
     n <- nrow(p_matrix)
-    eig <- RSpectra::eigs(p_matrix, 2, which = 'LM')$values
+
+    if(n<3) return 2;
+
+    eig <- tryCatch({RSpectra::eigs(p_matrix, 2, which = 'LM')$values},
+        error = function(f) {return(c(1, 0.5))
+    })
     lambda <- sort(Mod(eig), decreasing = TRUE)[2]
 
     gap <- 1 - lambda
+    if (gap < 1e-5) gap <- 1e-5
     mix_time <- ceiling(log(n / eps) / gap)
-    mix_time <- min(mix_time, 50)
-    list(
-    s_num_steps = mix_time,
-    spectral_gap = gap,
-    lambda = lambda
-  )
+    return mix_time; 
 }
 
 
 #' @export
 #' @useDynLib rwimputation, .registration = TRUE
-rwimpute <- function(data, num_steps = -1L, seed=42L) {
+rwimpute <- function(data, num_steps = -1L, seed=42L, restart_prob = 0.0) {
+    
+    if(restart_prob < 0.0 || restart_prob >= 1) stop()
+
     if (!is.data.frame(data)) data <- as.data.frame(data)
     p_matrix <- create_p_matrix(data)
 
-    if (num_steps == -1L) {
-        mix_time <- est_mix_time(p_matrix, eps = 0.01)
-        num_steps  <- as.integer( mix_time$s_num_steps)
-    } else if (num_steps < 1L) {
-        stop("")
+    if(restart_prob <= 0.0){
+        mix_time <- est_mix_time(p_matrix, eps=0.01)
+
+        if(num_steps == -1L){
+            num_steps <- as.integer(max(3, floor(mix_time / 2)))
+        } else if (num_steps > mix_time) {
+           warning(sprintf(""))
+           num_steps <- as.integer(mix_time)
+        }
+    } else{
+        if(num_steps == -1L) {
+            est_steps <- ceiling(40/restart_prob)
+            num_steps <- as.integer(max(50, min(est_steps, 2000)))   
+        }
+        else if (num_steps > 5000L) {
+           warning("")
+           num_steps <- 5000L
+        }
     }
 
     cols <- ncol(data)
@@ -57,9 +74,9 @@ rwimpute <- function(data, num_steps = -1L, seed=42L) {
 
     storage.mode(data_matrix) <- "double"
     storage.mode(p_matrix) <- "double"
-    col_types <- as.integer(col_types)
+    params <- as.double(c(num_steps, restart_prob))
 
-    raw_result <- .Call("r_rwimpute", data_matrix, p_matrix, col_types, as.double(num_steps), as.integer(seed))
+    raw_result <- .Call("r_rwimpute", data_matrix, p_matrix, as.integer(col_types), params, as.integer(seed))
     result_df <- data
     for (j in 1:cols) {
         if (col_types[j] == 1) {
