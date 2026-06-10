@@ -7,7 +7,11 @@ Description: Imputates missing values in data frames and matrices using random w
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-Suggests: tinytest
+Suggests: 
+    knitr,
+    rmarkdown,
+    tinytest
 Config/roxygen2/version: 8.0.0
 Imports: cluster
 URL: https://nkrajewska.github.io/rwimputation/
+VignetteBuilder: knitr
