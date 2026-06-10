@@ -3,11 +3,13 @@
 
 void run_rw_algorithm(
     const double *data, 
-    const double *p_matrix, 
+    const int* rows,
+    const int* col_ind,
+    const double* wghts,
     const int *col_types, 
     const double *params, 
-    int rows, 
-    int cols, 
+    int num_rows, 
+    int num_cols, 
     double *result,
     unsigned int base_seed
 );

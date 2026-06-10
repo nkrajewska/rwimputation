@@ -1,12 +1,12 @@
 Package: rwimputation
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Random Walk data imputation 
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-        license
+    person("Natalia", "Krajewska", , "natalia.krajewska.pl@gmail.com", role = c("aut", "cre"))
+Description: Imputates missing values in data frames and matrices using random walk algorithm on graph of connection between rows of provided data. Handles both numeric and categorical data.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests: tinytest
 Config/roxygen2/version: 8.0.0
+Imports: cluster, methods
