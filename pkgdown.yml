@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   rwimputation-usage: rwimputation-usage.html
-last_built: 2026-06-10T23:18Z
+last_built: 2026-06-10T23:28Z
 urls:
   reference: https://nkrajewska.github.io/rwimputation/reference
   article: https://nkrajewska.github.io/rwimputation/articles

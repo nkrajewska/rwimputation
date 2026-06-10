@@ -1,13 +1,15 @@
 # rwimputation
 
-Random Walk algorith imputation
+Random Walk algorithm imputation
 [![R-CMD-check](https://github.com/nkrajewska/rwimputation/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/nkrajewska/rwimputation/actions/workflows/R-CMD-check.yaml)
 R package for missing data imputation using the Random Walk algorithm,
 optimized with OpenMP in C.
 
-\## Description The `rwimputation` package provides solution for
-reconstructing missing values (`NA`) in matrices and data frames. It
-support mixed-type data (both numeric and categorical variables).
+## Description
+
+The `rwimputation` package provides solution for reconstructing missing
+values (`NA`) in matrices and data frames. It support mixed-type data
+(both numeric and categorical variables).
 
 ## Installation
 
