@@ -1,0 +1,29 @@
+---
+title: "Example rwimputation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example rwimputation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rwimputation)
+my_data <- data.frame(
+  Age = c(25, 38, NA, 19, 52, NA, 35),
+  Salary = c(5000, 6046, 5500, NA, 9407, 5200, NA),
+  Department = factor(c("IT", "HR", "IT", "Sales", NA, "HR", "IT"))
+)
+print("My data:")
+print(my_data)
+imputed_data <- rw_impute(my_data, k = 2, restart_prob = 0.15, steps = 100)
+print("Imputed data:")
+print(imputed_data)
+```
