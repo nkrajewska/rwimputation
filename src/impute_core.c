@@ -1,7 +1,10 @@
 #include "impute_core.h"
 #include <R.h>
 #include <stdlib.h>
-#include <omp.h>
+
+#ifdef _OPENMP
+  #include <omp.h>
+#endif
 
 static inline int sample_next_node(const int *ind, const double* wghts, double rand_val, int k) {
     double cum_prob = 0.0;
@@ -65,6 +68,10 @@ double calculate_mode(double *vect, int n){
     }
     return (double)mode;
 }
+unsigned int rand_gen(unsigned int *seed) {
+    *seed = (*seed * 1103515245 + 12345);
+    return *seed;
+}
 
 double simulate_random_walk(int start_node,const int* rows, const int* col_ind, const double* wghts,
     const double *data, int target_col, int num_rows, int num_steps, unsigned int loc_seed, int col_type, double restart_prob, double* trail){
@@ -75,13 +82,15 @@ double simulate_random_walk(int start_node,const int* rows, const int* col_ind, 
 
     if(restart_prob > 0.0){
         for(int i =0; i < num_steps; i++){
-            double rnd = (double)rand_r(&loc_seed)/RAND_MAX;
+            unsigned int rand = rand_gen(&loc_seed);
+            double rnd = (double)(rand % 65536) / 65535.0;
             if(rnd<restart_prob) curr_node = start_node;
             
             int start = rows[curr_node];
             
             int deg = rows[curr_node + 1] - start;
-            double rand_val = (double)rand_r(&loc_seed) / RAND_MAX;
+            unsigned int rand2 = rand_gen(&loc_seed);
+            double rand_val = (double)(rand2 % 65536) / 65535.0;
 
             curr_node = sample_next_node(col_ind + start, wghts + start, rand_val, deg);
             trail[i] = targ_col_ptr[curr_node];
@@ -89,7 +98,8 @@ double simulate_random_walk(int start_node,const int* rows, const int* col_ind, 
         }
     }else{
         for(int i = 0; i< num_steps;i++){
-            double rand_val = (double)rand_r(&loc_seed) / RAND_MAX;
+            unsigned int rand2 = rand_gen(&loc_seed);
+            double rand_val = (double)(rand2 % 65536) / 65535.0;
 
             int start = rows[curr_node];
             int deg= rows[curr_node + 1] - start;
