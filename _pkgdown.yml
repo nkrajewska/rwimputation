@@ -1,0 +1,24 @@
+url: https://nkrajewska.github.io/rwimputation/
+template:
+  bootstrap: 5
+navbar:
+  structure:
+    left:
+    - intro
+    - reference
+    - articles
+    - news
+    right: github
+  components:
+    intro:
+      text: Get started
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    news:
+      text: Changelog
+      href: news/index.html
+development:
+  mode: release
+
