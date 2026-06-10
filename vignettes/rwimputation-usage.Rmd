@@ -23,7 +23,7 @@ my_data <- data.frame(
 )
 print("My data:")
 print(my_data)
-imputed_data <- rw_impute(my_data, k = 2, restart_prob = 0.15, steps = 100)
+imputed_data <- rwimpute(my_data, k = 2, restart_prob = 0.15, steps = 100)
 print("Imputed data:")
 print(imputed_data)
 ```
