@@ -16,12 +16,14 @@ values (`NA`) in matrices and data frames. It support mixed-type data
 You can install the development version of `rwimputation` directly from
 GitHub using the `remotes` (or `devtools`) package:
 
-\`\`\`R \# Install remotes if you haven’t already:
-install.packages(“remotes”)
+``` r
+
+# Install remotes if you haven't already:
+install.packages("remotes")
 
 # Install the package from GitHub:
-
-remotes::install_github(“nkrajewska/rwimputation”)
+remotes::install_github("nkrajewska/rwimputation")
+```
 
 # Package index
 
