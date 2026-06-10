@@ -19,3 +19,4 @@ install.packages("remotes")
 
 # Install the package from GitHub:
 remotes::install_github("nkrajewska/rwimputation")
+```
