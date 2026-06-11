@@ -14,6 +14,7 @@ create_p_matrix <- function(data, thld) {
     for( i in seq_len(n_row) ){
         d <- dist[i, ]
         d[i] <- Inf
+        d[is.na(d)] <- Inf
 
         knn <- order(d)[seq_len(k)]
         knn_dist <- d[knn]
